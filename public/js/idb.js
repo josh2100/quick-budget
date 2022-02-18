@@ -1,5 +1,5 @@
 let db;
-const request = indexedDB.open("quick-budget", 1);
+const request = indexedDB.open("quick_budget", 1);
 
 // this event will emit if the database version changes (nonexistant to
 // version 1, v1 to v2, etc.)
@@ -28,7 +28,7 @@ request.onerror = function (event) {
   console.log(event.target.errorCode);
 };
 
-// This function will be executed if we attempt to submit a new pizza and there's no internet connection
+// This function will be executed if we attempt to submit a new budget and there's no internet connection
 function saveRecord(record) {
   // open a new transaction with the database with read and write permissions
   const transaction = db.transaction(["new_budget"], "readwrite");
