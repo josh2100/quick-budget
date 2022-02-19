@@ -9,7 +9,14 @@ const FILES_TO_CACHE = [
   "/js/idb.js",
   "/js/index.js",
   "/css/styles.css",
-  // other js files
+  "/icons/icon-72x72.png",
+  "/icons/icon-96x96.png",
+  "/icons/icon-128x128.png",
+  "/icons/icon-144x144.png",
+  "/icons/icon-152x152.png",
+  "/icons/icon-192x192.png",
+  "/icons/icon-384x384.png",
+  "/icons/icon-512x512.png",
 ];
 
 // Install
@@ -20,39 +27,18 @@ self.addEventListener("install", function (e) {
       return cache.addAll(FILES_TO_CACHE);
     })
   );
-    // What does this do?
+  // Makes sure updates to service worker take effect immediately
   self.skipWaiting();
 });
 
-// Activate and clear cache
-// self.addEventListener("activate", function (e) {
-//   e.waitUntil(
-//     caches.keys().then(function (keyList) {
-//       let cacheKeeplist = keyList.filter(function (key) {
-//         return key.indexOf(APP_PREFIX);
-//       });
-//       cacheKeeplist.push(CACHE_NAME);
-
-//       return Promise.all(
-//         keyList.map(function (key, i) {
-//           if (cacheKeeplist.indexOf(key) === -1) {
-//             console.log("deleting cache : " + keyList[i]);
-//             return caches.delete(keyList[i]);
-//           }
-//         })
-//       );
-//     })
-//   );
-// });
-
 // Activate the service worker and remove old data from the cache
-self.addEventListener('activate', function(evt) {
+self.addEventListener("activate", function (evt) {
   evt.waitUntil(
-    caches.keys().then(keyList => {
+    caches.keys().then((keyList) => {
       return Promise.all(
-        keyList.map(key => {
+        keyList.map((key) => {
           if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
-            console.log('Removing old cache data', key);
+            console.log("Removing old cache data", key);
             return caches.delete(key);
           }
         })
@@ -63,35 +49,16 @@ self.addEventListener('activate', function(evt) {
   self.clients.claim();
 });
 
-// // Intercept fetch requests
-// self.addEventListener("fetch", function (e) {
-//   console.log("anything fetch request : ", e.request);
-//   e.respondWith(
-//     caches.match(e.request).then(function (request) {
-//       if (request) {
-//         // if cache is available, respond with cache
-//         console.log("responding with cache : " + e.request.url);
-//         return request;
-//       } else {
-//         // if there are no cache, try fetching request
-//         console.log("file is not cached, fetching : " + e.request.url);
-//         return fetch(e.request);
-
-//       }
-//     })
-//   );
-// });
-
 // Intercept fetch requests
-self.addEventListener('fetch', function(e) {
-  if (e.request.url.includes('/api/')) {
+self.addEventListener("fetch", function (e) {
+  if (e.request.url.includes("/api/")) {
     e.respondWith(
       caches
         .open(DATA_CACHE_NAME)
         // .open(CACHE_NAME)
-        .then(cache => {
+        .then((cache) => {
           return fetch(e.request)
-            .then(response => {
+            .then((response) => {
               // If the response was good, clone it and store it in the cache.
               if (response.status === 200) {
                 cache.put(e.request.url, response.clone());
@@ -99,28 +66,27 @@ self.addEventListener('fetch', function(e) {
 
               return response;
             })
-            .catch(err => {
+            .catch((err) => {
               // Network request failed, try to get it from the cache.
               return cache.match(e.request);
             });
         })
-        .catch(err => console.log(err))
+        .catch((err) => console.log(err))
     );
 
     return;
   }
 
   e.respondWith(
-    fetch(e.request).catch(function() {
-      return caches.match(e.request).then(function(response) {
+    fetch(e.request).catch(function () {
+      return caches.match(e.request).then(function (response) {
         if (response) {
           return response;
-        } else if (e.request.headers.get('accept').includes('text/html')) {
+        } else if (e.request.headers.get("accept").includes("text/html")) {
           // return the cached home page for all requests for html pages
-          return caches.match('/');
+          return caches.match("/");
         }
       });
     })
   );
-
 });
