@@ -55,7 +55,6 @@ self.addEventListener("fetch", function (e) {
     e.respondWith(
       caches
         .open(DATA_CACHE_NAME)
-        // .open(CACHE_NAME)
         .then((cache) => {
           return fetch(e.request)
             .then((response) => {
@@ -83,7 +82,7 @@ self.addEventListener("fetch", function (e) {
         if (response) {
           return response;
         } else if (e.request.headers.get("accept").includes("text/html")) {
-          // return the cached home page for all requests for html pages
+          // Return the cached home page for all requests for html pages
           return caches.match("/");
         }
       });
